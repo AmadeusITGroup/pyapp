@@ -8,6 +8,12 @@ These options have no effect when the project installation is [disabled](#skippi
 
 You may set the `PYAPP_UV_ENABLED` option to `true` or `1` to use [UV](https://github.com/astral-sh/uv) for virtual environment creation and project installation.
 
+Executable is downloaded from the release section of the repository.
+
+### Custom repository
+
+You may use your own GitHub fork/mirror of [UV repository](https://github.com/astral-sh/uv) by setting the `PYAPP_UV_REPOSITORY` option.
+
 ### Version ### {: #uv-version }
 
 You may use a specific `X.Y.Z` version by setting the `PYAPP_UV_VERSION` option.

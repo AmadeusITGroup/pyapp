@@ -17,13 +17,16 @@ Setting the `PYAPP_PYTHON_VERSION` option will determine the distribution used a
 | `3.11` |
 | `3.12` |
 
-The source for pre-built distributions is the [python-build-standalone](https://github.com/indygreg/python-build-standalone) project.
+The source for pre-built distributions is the [python-build-standalone](https://github.com/indygreg/python-build-standalone) repository.
+Distributions are downloaded from the release section.
 
 Some distributions have [variants](https://gregoryszorc.com/docs/python-build-standalone/main/running.html) that may be configured with the `PYAPP_DISTRIBUTION_VARIANT` option:
 
 | Platform | Options |
 | --- | --- |
 | Linux | <ul><li><code>v1</code></li><li><code>v2</code></li><li><code>v3</code> (default)</li><li><code>v4</code></li></ul> |
+
+If you want to change the repository URL in order to targer your own GitHub fork/mirror, you can set the `PYAPP_DISTRIBUTION_CPYTHON_REPOSITORY` option.
 
 ### PyPy
 
@@ -34,6 +37,7 @@ Some distributions have [variants](https://gregoryszorc.com/docs/python-build-st
 | `pypy3.10` |
 
 The source of distributions is the [PyPy](https://www.pypy.org) project.
+If you want to change the host in order target your own fork/mirror, you can set the `PYAPP_DISTRIBUTION_PYPY_HOST` option.
 
 ## Custom
 

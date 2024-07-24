@@ -471,6 +471,22 @@ pub fn ensure_installer_available() -> Result<()> {
     Ok(())
 }
 
+fn build_uv_download_url(version: &str, artifact_name: &str) -> String {
+    let repository = app::uv_repository();
+
+    if version == "any" {
+        format!(
+            "{}/releases/latest/download/{}",
+            &repository, &artifact_name,
+        )
+    } else {
+        format!(
+            "{}/releases/download/{}/{}",
+            &repository, &version, &artifact_name,
+        )
+    }
+}
+
 fn ensure_uv_available() -> Result<()> {
     let uv_version = app::uv_version();
     let lock_path = app::installer_lock("uv", &uv_version);
@@ -494,18 +510,7 @@ fn ensure_uv_available() -> Result<()> {
     let mut f = fs::File::create(&temp_path)
         .with_context(|| format!("unable to create temporary file: {}", &temp_path.display()))?;
 
-    let url = if uv_version == "any" {
-        format!(
-            "https://github.com/astral-sh/uv/releases/latest/download/{}",
-            &artifact_name,
-        )
-    } else {
-        format!(
-            "https://github.com/astral-sh/uv/releases/download/{}/{}",
-            &uv_version, &artifact_name,
-        )
-    };
-
+    let url = build_uv_download_url(&uv_version, &artifact_name);
     network::download(&url, &mut f, "UV")?;
 
     if artifact_name.ends_with(".zip") {
@@ -566,5 +571,26 @@ fn apply_project_features(install_target: String) -> String {
         install_target
     } else {
         format!("{install_target}[{}]", app::pip_project_features())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn download_specific_uv_version_from_official_repository_by_default() {
+        assert_eq!(
+            "https://github.com/astral-sh/uv/releases/download/my_version/my_artifact",
+            build_uv_download_url("my_version", "my_artifact")
+        );
+    }
+
+    #[test]
+    fn download_latest_uv_version_from_official_repository_by_default() {
+        assert_eq!(
+            "https://github.com/astral-sh/uv/releases/latest/download/my_artifact",
+            build_uv_download_url("any", "my_artifact")
+        );
     }
 }

@@ -194,6 +194,13 @@ pub fn uv_only_bootstrap() -> bool {
     env!("PYAPP_UV_ONLY_BOOTSTRAP") == "1"
 }
 
+pub fn uv_repository() -> String {
+    env!("PYAPP_UV_REPOSITORY")
+        .to_string()
+        .trim_end_matches('/')
+        .into()
+}
+
 pub fn uv_version() -> String {
     env!("PYAPP_UV_VERSION").into()
 }
@@ -296,4 +303,21 @@ pub fn installer_lock(name: &str, id: &str) -> PathBuf {
     cache_dir()
         .join("locks")
         .join(format!("installer-{}-{}", name, id))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn distribution_source_is_python_build_standalone_repository_by_default() {
+        let source = distribution_source();
+        assert!(source
+            .starts_with("https://github.com/indygreg/python-build-standalone/releases/download/"));
+    }
+
+    #[test]
+    fn uv_repository_is_official_one_by_default() {
+        assert_eq!("https://github.com/astral-sh/uv", uv_repository());
+    }
 }
