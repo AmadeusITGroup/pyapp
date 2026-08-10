@@ -7,18 +7,18 @@
 # ///
 from __future__ import annotations
 
-import sys
 import os
+import sys
 from collections import defaultdict
 from collections.abc import Callable, Generator
 from contextlib import suppress
 from itertools import count
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 import httpx2
-from rich.progress import Progress
 from packaging.version import Version
+from rich.progress import Progress
 
 RELEASES_URL = 'https://api.github.com/repos/astral-sh/python-build-standalone/releases'
 PLATFORMS = ('linux', 'windows', 'macos')
@@ -41,11 +41,13 @@ def get_assets() -> Generator[tuple[str, str]]:
     with Progress() as progress:
         task = progress.add_task("Updating distributions...")
         for page in count(1):
-            yield from get_asset_page(page, headers, set_total=lambda total: progress.update(task, total=total))
+            has_next = yield from get_asset_page(page, headers, set_total=lambda total: progress.update(task, total=total))
             progress.advance(task, 1)
+            if not has_next:
+                break
 
 
-def get_asset_page(page: int, headers: dict[str, str], *, set_total: Callable[[int], None]) -> Generator[tuple[str, str]]:
+def get_asset_page(page: int, headers: dict[str, str], *, set_total: Callable[[int], None]) -> Generator[tuple[str, str], None, bool]:
     response = httpx2.get(RELEASES_URL, headers=headers, timeout=60, params={'page': page, 'per_page': 5})
     releases = response.json()
     if not response.is_success:
@@ -60,11 +62,13 @@ def get_asset_page(page: int, headers: dict[str, str], *, set_total: Callable[[i
             set_total(int(last_page))
 
     if not releases:
-        return
+        return False
 
     for release in releases:
         for asset in release['assets']:
             yield asset['name'], asset['browser_download_url']
+
+    return 'next' in response.links
 
 
 def main():
